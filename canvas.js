@@ -63,16 +63,18 @@ function resizeDisplay() {
 $(window).resize(resizeDisplay);
 resizeDisplay(); //first time
 
+//Set the window to be unselectable
+window.onload = ()=>{
+	//If needed this can be applied per element instead of doc
+	document.onselectstart = ()=>{ return false; };
+	document.onmousedown = ()=>{ return false; };
+}
+
 var image = document.getElementById("image");
 var ictx = image.getContext("2d");
 
 //load the base image onto the image canvas
 var img = new Image();
-/*img.src = "suika.png";
-img.addEventListener('load', ()=> {
-	ictx.drawImage(img, 0, 0);
-	updateCanvas();
-}); */
 
 // IO Server
 var socket = io(server);
