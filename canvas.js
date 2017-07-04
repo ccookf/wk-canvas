@@ -15,6 +15,8 @@ var user;
 		user = res.user_information;
 		if (user.level >= 4) isValidUser = true;
 		else console.warn("User is not level 4 or higher.");
+		//Note to self, remember to blacklist the public test key
+		//when I do the server validation
 	}
 	else console.warn("Failed to get WK user data.");
 });*/
