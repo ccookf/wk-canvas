@@ -6,6 +6,8 @@ else console.error("jQuery has not loaded");
 ///// Initiation //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+var server = "http://localhost:4242";
+
 // User data
 var user_wk_api_key = "e76ae77aa086d5b9896ea32f37d6d14e";
 var isValidUser = false;
@@ -59,7 +61,6 @@ img.addEventListener('load', ()=> {
 }); */
 
 // IO Server
-var server = "http://localhost:4242";
 var socket = io(server);
 socket.on('connect', ()=>{
 	console.log("Connected to server successfully");
