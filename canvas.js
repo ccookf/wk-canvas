@@ -10,21 +10,14 @@ else console.error("jQuery has not loaded");
 var user_wk_api_key = "e76ae77aa086d5b9896ea32f37d6d14e";
 var isValidUser = false;
 var user;
-$.get("https://www.wanikani.com/api/user/" + user_wk_api_key + "/user-information", (res)=>{
+/*$.get("https://www.wanikani.com/api/user/" + user_wk_api_key + "/user-information", (res)=>{
 	if (res) {
 		user = res.user_information;
 		if (user.level >= 4) isValidUser = true;
 		else console.warn("User is not level 4 or higher.");
 	}
 	else console.warn("Failed to get WK user data.");
-});
-
-// IO Server
-var server = "http://localhost:4242";
-var socket = io(server);
-socket.on('connect', ()=>{
-	console.log("Connected to server successfully");
-});
+});*/
 
 var debug_mode = false;
 var scale = [1, 2, 4, 8, 16, 32];
@@ -35,10 +28,10 @@ var scale_level = 2;
 var pos = { x: 0, y: 0 };
 var isMouseDown = false;
 var isDragMode = false;
-var dragThreshold = 50; //Number of pixels before mousedown is treated as a drag
+var dragThreshold = 25; //Number of pixels before mousedown is treated as a drag
 var downCoords = { x: 0, y: 0 };
 
-var paintColor = 'rgb(0,255,0)';
+var paintColor = { r: 0, g: 255, b: 0 };
 
 // Source data, specifications
 var BOUNDARY_WIDTH = 128;
@@ -57,10 +50,33 @@ var ictx = image.getContext("2d");
 
 //load the base image onto the image canvas
 var img = new Image();
-img.src = "suika.png";
+/*img.src = "suika.png";
 img.addEventListener('load', ()=> {
 	ictx.drawImage(img, 0, 0);
 	updateCanvas();
+}); */
+
+// IO Server
+var server = "http://localhost:4242";
+var socket = io(server);
+socket.on('connect', ()=>{
+	console.log("Connected to server successfully");
+
+	socket.emit('getcanvas', (data)=>{
+
+		//Set the size of the canvas hosting the image to match the data
+		image.height = data.length;
+		image.width = data[0].length;
+
+		for (var y = 0; y < data.length; y++) {
+			for (var x = 0; x < data[y].length; x++) {
+				color = data[y][x]; //Uint8Array [r, g, b]
+				ictx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
+				ictx.fillRect(x, y, 1, 1);
+			}
+		}
+		updateCanvas();
+	});
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,11 +185,19 @@ function paint() {
 	localCoord.y = Math.floor((downCoords.y - offset.y) / zoom);
 
 	if (debug_mode) console.log('Image coordinate: ('+ localCoord.x + ', ' + localCoord.y + ')');
-	ictx.fillStyle = paintColor;
-	ictx.fillRect(localCoord.x, localCoord.y, 1, 1);
-
-	updateCanvas();
+	var color = new Uint8Array([paintColor.r, paintColor.g, paintColor.b]);
+	var out = { color: color, pos: { x: localCoord.x, y: localCoord.y }};
+	
+	//Don't paint the pixel until the server verifies its fine and announces it
+	socket.emit('paint', out);
 }
+
+//Server announcing the paint from above function
+socket.on('paint', (data)=>{
+	ictx.fillStyle = 'rgb(' + data.color[0] + ',' + data.color[1] + ',' + data.color[2] + ')';
+	ictx.fillRect(data.pos.x, data.pos.y, 1, 1);
+	updateCanvas();
+});
 
 function mouseMove(e) {
 	var x = e.layerX;
