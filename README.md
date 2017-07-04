@@ -23,7 +23,7 @@ Client UI:
 
 Color selector
 ~~Zoom in/out buttons~~
-Display coordinates
+~~Display coordinates~~
 ~~Reset position/zoom~~
 API key dialogues
 Connection status dialogues

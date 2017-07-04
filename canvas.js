@@ -101,6 +101,10 @@ socket.on('connect', ()=>{
 	});
 });
 
+socket.on('disconnect', ()=>{
+	console.error('Disconnected from server.');
+});
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Input Processing ////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,6 +256,7 @@ function mouseMove(e) {
 	var x = e.layerX;
 	var y = e.layerY;
 
+	//Preview pixel placement
 	localCoord = canvasToImageCoordinate(x, y);
 	if (localCoord.x != mouseOverPixel.x || localCoord.y != mouseOverPixel.y) {
 		//Draw the image state back onto the canvas, clearing out temp items
@@ -261,7 +266,11 @@ function mouseMove(e) {
 		//Draw directly to the main canvas, not the image
 		ctx.fillStyle = 'rgb(' + paintColor.r + ',' + paintColor.g + ',' + paintColor.b + ')';
 		ctx.fillRect(canvasCoord.x, canvasCoord.y, 1 * scale[scale_level], 1 * scale[scale_level]);
-}
+	}
+
+	//Display the mouse coordinates
+	centeredCoord = { x: localCoord.x - image.width / 2, y: -1 * (localCoord.y - image.height / 2) };
+	$("#coordinates").html("( " + centeredCoord.x + ", " + centeredCoord.y + ")");
 	
 	if (isMouseDown) {
 		//Check to see if it's in drag mode

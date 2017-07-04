@@ -11,13 +11,15 @@
         </script-->
         <script src="jquery-3.2.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     </head>
 
 	<body>
 		<div class="ui-container">
-            <div id="zoomout" class="ui-buttons">-</div>
-            <div id="zoomin" class="ui-buttons">+</div>
+            <div id="zoomout" class="ui-buttons">( - )</div>
+            <div id="zoomin" class="ui-buttons">(+)</div>
             <div id="reset" class="ui-buttons">Reset</div>
+            <div id="coordinates" class="ui-text">( X, Y )</div>
         </div>
         
         <canvas id="paint" width="512" height="512">

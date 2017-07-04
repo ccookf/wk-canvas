@@ -1,6 +1,8 @@
 body {
     background-color: grey;
     margin: 0;
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
 }
 
 #paint, #image {
@@ -9,23 +11,27 @@ body {
 
 .ui-container {
     position: fixed;
-    margin-top: 0.2em;
-    margin-left: 0.2em;
+    background: rgba(0,0,0,0.65);
+    color: white;
 }
 
 .ui-buttons {
     display: inline-block;
     padding: 0.5em 1em;
     margin: 0;
-    background-color: white;
-    border: 0.3em solid black;
-    border-radius: 5px;
 }
 
 .ui-buttons:hover {
-    font-weight: bold;
+    background-color: #555;
 }
 
 .ui-buttons:active {
-    background-color: white;
+    background-color: black;
+}
+
+.ui-text {
+    display: inline-block;
+    padding: 0.5em 1em;
+    margin: 0;
+    min-width: 5em;
 }
