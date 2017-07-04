@@ -33,7 +33,8 @@ var pos = { x: 0, y: 0 };
 var isMouseDown = false;
 var isDragMode = false;
 var dragThreshold = 25; //Number of pixels before mousedown is treated as a drag
-var downCoords = { x: 0, y: 0 };
+var downCoords = { x: 0, y: 0 }; //Coordinates of mousedown event
+var mouseOverPixel = { x: 0, y: 0 }; //Current "pixel" under the mouse
 
 var paintColor = { r: 0, g: 255, b: 0 };
 
@@ -147,17 +148,14 @@ function zoomIn() {
 	if (scale_level < scale.length - 1) {
 		
 		//Convert the center of the screen to a coordinate in image space
-		var zoom = scale[scale_level];
-		localCoord = { x: 0, y: 0 };
-		localCoord.x = ((canvas.width/2 - offset.x) / zoom);
-		localCoord.y = ((canvas.height/2 - offset.y) / zoom);
+		localCoord = canvasToImageCoordinate(canvas.width/2, canvas.height/2);
 		
 		//Change the scale
 		++scale_level;
-		zoom = scale[scale_level];
+		var zoom = scale[scale_level];
 
 		//Revert back from image space coordinates to the center of screen
-		offset.x = canvas.height/2 - localCoord.x * zoom;
+		offset.x = canvas.width/2 - localCoord.x * zoom;
 		offset.y = canvas.height/2 - localCoord.y * zoom;
 	}
 	updateCanvas();
@@ -166,26 +164,38 @@ function zoomIn() {
 function zoomOut() {
 	if (scale_level > 0) {
 		
-		var zoom = scale[scale_level];
-		localCoord = { x: 0, y: 0 };
-		localCoord.x = (canvas.width/2 - offset.x) / zoom;
-		localCoord.y = (canvas.height/2 - offset.y) / zoom;
+		localCoord = canvasToImageCoordinate(canvas.width/2, canvas.height/2);
 		
 		--scale_level;
-		zoom = scale[scale_level];
-		offset.x = canvas.height/2 - localCoord.x * zoom;
+		var zoom = scale[scale_level];
+		offset.x = canvas.width/2 - localCoord.x * zoom;
 		offset.y = canvas.height/2 - localCoord.y * zoom;
 	}
 	updateCanvas();
 }
 
+function canvasToImageCoordinate(x, y) {
+	var zoom = scale[scale_level];
+	localCoord = { x: 0, y: 0 };
+	localCoord.x = Math.floor((x - offset.x) / zoom);
+	localCoord.y = Math.floor((y - offset.y) / zoom);
+
+	return localCoord;
+}
+
+function imageToCanvasCoordinate(x, y) {
+	var zoom = scale[scale_level];
+	canvasCoord = { x: 0, y: 0 };
+	canvasCoord.x = x * zoom + offset.x;
+	canvasCoord.y = y * zoom + offset.y;
+
+	return canvasCoord;
+}
+
 function paint() {
 	if (debug_mode) console.log('Paint applied to coordinate: ('+ downCoords.x + ', ' + downCoords.y + ')');
 	//Convert canvas point to image space
-	var zoom = scale[scale_level];
-	localCoord = { x: 0, y: 0 };
-	localCoord.x = Math.floor((downCoords.x - offset.x) / zoom);
-	localCoord.y = Math.floor((downCoords.y - offset.y) / zoom);
+	localCoord = canvasToImageCoordinate(downCoords.x, downCoords.y);
 
 	if (debug_mode) console.log('Image coordinate: ('+ localCoord.x + ', ' + localCoord.y + ')');
 	var color = new Uint8Array([paintColor.r, paintColor.g, paintColor.b]);
@@ -205,6 +215,19 @@ socket.on('paint', (data)=>{
 function mouseMove(e) {
 	var x = e.layerX;
 	var y = e.layerY;
+
+	localCoord = canvasToImageCoordinate(x, y);
+	if (localCoord.x != mouseOverPixel.x || localCoord.y != mouseOverPixel.y) {
+		//Draw the image state back onto the canvas, clearing out temp items
+		updateCanvas();
+		//Convert local coordinates to canvas space
+		canvasCoord = imageToCanvasCoordinate(localCoord.x, localCoord.y);
+		//Draw directly to the main canvas, not the image
+		ctx.fillStyle = 'rgb(' + paintColor.r + ',' + paintColor.g + ',' + paintColor.b + ')';
+		ctx.fillRect(canvasCoord.x, canvasCoord.y, 1 * scale[scale_level], 1 * scale[scale_level]);
+		console.log("Image  (" + localCoord.x + ", " + localCoord.y + ")");
+		console.log("Canvas (" + canvasCoord.x + ", " + canvasCoord.y + ")");
+}
 	
 	if (isMouseDown) {
 		//Check to see if it's in drag mode

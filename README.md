@@ -17,7 +17,7 @@ Client:
 
 Set the canvas initial dimensions
 Handle window resize event
-Show potential pixel on mouseover
+~~Show potential pixel on mouseover~~
 
 Client UI:
 
@@ -28,6 +28,7 @@ Reset position/zoom
 API key dialogues
 Connection status dialogues
 Save button
+Display pixel guidelines
 
 Server:
 
