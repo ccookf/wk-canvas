@@ -6,6 +6,7 @@ else console.error("jQuery has not loaded");
 ///// Initiation //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+// User data
 var user_wk_api_key = "e76ae77aa086d5b9896ea32f37d6d14e";
 var isValidUser = false;
 var user;
@@ -16,6 +17,13 @@ $.get("https://www.wanikani.com/api/user/" + user_wk_api_key + "/user-informatio
 		else console.warn("User is not level 4 or higher.");
 	}
 	else console.warn("Failed to get WK user data.");
+});
+
+// IO Server
+var server = "http://localhost:4242";
+var socket = io(server);
+socket.on('connect', ()=>{
+	console.log("Connected to server successfully");
 });
 
 var debug_mode = false;
@@ -178,7 +186,6 @@ function mouseMove(e) {
 			//This allows a slight mouse twitch while painting, but a low enough threshold feels responsive on drag
 			if (Math.abs(x - downCoords.x) > dragThreshold || Math.abs(y - downCoords.y) >= dragThreshold) {
 				isDragMode = true;
-				console.log("Drag start.");
 			}
 		} else {
 			offset.x += x - downCoords.x;
