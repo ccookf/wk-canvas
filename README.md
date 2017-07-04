@@ -15,8 +15,8 @@ socket.io, jQuery
 
 Client:
 
-Set the canvas initial dimensions
-Handle window resize event
+~~Set the canvas initial dimensions~~
+~~Handle window resize event~~
 ~~Show potential pixel on mouseover~~
 
 Client UI:

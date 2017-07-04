@@ -46,6 +46,13 @@ var changes = 0;
 
 //Update the canvas and run a backup after BACKUP_THRESHOLD changes occur
 function pushPaint(data) {
+    //Make sure data is in boundaries
+    if (data.pos.x < 0 || data.pos.y < 0 || 
+        data.pos.x >= CANVAS_WIDTH || data.pos.y >= CANVAS_HEIGHT) {
+            
+            return;
+    }
+    
     changes++;
     canvas[data.pos.y][data.pos.x] = data.color;
 

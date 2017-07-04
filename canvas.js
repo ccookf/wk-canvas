@@ -27,7 +27,7 @@ var debug_mode = false;
 var scale = [1, 2, 4, 8, 16, 32, 64];
 
 var offset = { x: 0, y: 0 };
-var scale_level = 2;
+var scale_level = 0;
 
 var pos = { x: 0, y: 0 };
 var isMouseDown = false;
@@ -44,11 +44,24 @@ var BOUNDARY_HEIGHT = 128;
 
 // Canvas and image data
 var canvas = document.getElementById("paint");
+
 var ctx = canvas.getContext("2d");
-ctx.mozImageSmoothingEnabled = false;
-ctx.webkitImageSmoothingEnabled = false;
-ctx.msImageSmoothingEnabled = false;
-ctx.imageSmoothingEnabled = false;
+
+//Set initial dimensions of the canvas to match the window
+function resizeDisplay() {
+	canvas.width = $(window).width();
+	canvas.height = $(window).height();
+
+	//These seem to reset when the canvas dimensions are adjusted
+	//Need to look into why later
+	ctx.mozImageSmoothingEnabled = false;
+	ctx.webkitImageSmoothingEnabled = false;
+	ctx.msImageSmoothingEnabled = false;
+	ctx.imageSmoothingEnabled = false;
+}
+//Listen and resize automatically
+$(window).resize(resizeDisplay);
+resizeDisplay(); //first time
 
 var image = document.getElementById("image");
 var ictx = image.getContext("2d");
@@ -68,6 +81,8 @@ socket.on('connect', ()=>{
 
 	socket.emit('getcanvas', (data)=>{
 
+		if (!data) { error("Failed to retreive canvas data."); return; }
+
 		//Set the size of the canvas hosting the image to match the data
 		image.height = data.length;
 		image.width = data[0].length;
@@ -75,6 +90,7 @@ socket.on('connect', ()=>{
 		for (var y = 0; y < data.length; y++) {
 			for (var x = 0; x < data[y].length; x++) {
 				color = data[y][x]; //Uint8Array [r, g, b]
+				if (!color) { error("Data coordinate missing color data!"); continue; }
 				ictx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
 				ictx.fillRect(x, y, 1, 1);
 			}
@@ -225,8 +241,6 @@ function mouseMove(e) {
 		//Draw directly to the main canvas, not the image
 		ctx.fillStyle = 'rgb(' + paintColor.r + ',' + paintColor.g + ',' + paintColor.b + ')';
 		ctx.fillRect(canvasCoord.x, canvasCoord.y, 1 * scale[scale_level], 1 * scale[scale_level]);
-		console.log("Image  (" + localCoord.x + ", " + localCoord.y + ")");
-		console.log("Canvas (" + canvasCoord.x + ", " + canvasCoord.y + ")");
 }
 	
 	if (isMouseDown) {
@@ -247,4 +261,8 @@ function mouseMove(e) {
 			updateCanvas();
 		}
 	}
+}
+
+function error(message) {
+	console.error(message);
 }
