@@ -122,6 +122,7 @@ canvas.addEventListener("mousedown", (e)=>{
 });
 canvas.addEventListener("mouseleave", ()=>{
 	isMouseDown = false;
+	updateCanvas(); //Remove the pixel preview, even across windows
 });
 canvas.addEventListener("mouseup", ()=>{
 	if (!isDragMode) paint();
