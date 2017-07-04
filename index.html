@@ -3,7 +3,7 @@
 	<head>
 		<title>Canvas</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<!--link rel="stylesheet" href="../webgl.css" type="text/css"-->
+		<link rel="stylesheet" href="canvas.css" type="text/css">
         <!--script
             src="https://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -11,20 +11,16 @@
         </script-->
         <script src="jquery-3.2.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-        <style>
-            body {
-                background-color: blanchedalmond;
-                margin: 0;
-            }
-
-            #paint, #image {
-                background-color: white;
-            }
-        </style>
     </head>
 
 	<body>
-		<canvas id="paint" width="512" height="512">
+		<div class="ui-container">
+            <div id="zoomout" class="ui-buttons">-</div>
+            <div id="zoomin" class="ui-buttons">+</div>
+            <div id="reset" class="ui-buttons">Reset</div>
+        </div>
+        
+        <canvas id="paint" width="512" height="512">
 			Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
 		</canvas>
 

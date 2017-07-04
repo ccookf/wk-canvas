@@ -95,7 +95,7 @@ socket.on('connect', ()=>{
 				ictx.fillRect(x, y, 1, 1);
 			}
 		}
-		updateCanvas();
+		resetView();
 	});
 });
 
@@ -112,6 +112,11 @@ function wheelHandler(e) {
 	if (up) zoomIn();
 	else zoomOut();
 }
+
+// UI events
+$("#zoomout").click(zoomOut);
+$("#zoomin").click(zoomIn);
+$("#reset").click(resetView);
 
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
@@ -140,6 +145,9 @@ window.addEventListener("keydown", (e)=>{
 		case "=":
 			zoomIn();
 			break;
+		case "0":
+			resetView();
+			break;
 		default:
 			if (debug_mode) console.log("Unexpected keyboard event: " + e.key);
 			return;
@@ -159,6 +167,15 @@ function updateCanvas() {
 function clearCanvas() {
 	ctx.fillStyle = "grey";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function resetView() {
+	//Reset the zoom
+	scale_level = 0;
+	//Get the offsets for the top left corner of the image that would center on canvas
+	offset.x = (canvas.width - image.width) / 2;
+	offset.y = (canvas.height - image.height) / 2;
+	updateCanvas();
 }
 
 function zoomIn() {

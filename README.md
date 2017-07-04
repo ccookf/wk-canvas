@@ -22,9 +22,9 @@ Client:
 Client UI:
 
 Color selector
-Zoom in/out buttons
+~~Zoom in/out buttons~~
 Display coordinates
-Reset position/zoom
+~~Reset position/zoom~~
 API key dialogues
 Connection status dialogues
 Save button
