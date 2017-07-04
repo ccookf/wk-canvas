@@ -24,7 +24,7 @@ var user;
 });*/
 
 var debug_mode = false;
-var scale = [1, 2, 4, 8, 16, 32];
+var scale = [1, 2, 4, 8, 16, 32, 64];
 
 var offset = { x: 0, y: 0 };
 var scale_level = 2;
