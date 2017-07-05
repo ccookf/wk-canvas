@@ -11,7 +11,7 @@ body {
 
 .ui-container {
     position: fixed;
-    background: rgba(0,0,0,0.65);
+    background: rgba(0,0,0,1);
     color: white;
 }
 
@@ -34,4 +34,58 @@ body {
     padding: 0.5em 1em;
     margin: 0;
     min-width: 5em;
+}
+
+#color-picker {
+    width: 100%;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.default-colors {
+    float:left;
+    width: 10%;
+    min-height: 2em;
+    min-width: 1em;
+}
+
+#white {
+    background-color: white;
+}
+
+#red {
+    background-color: red;
+}
+
+#orange {
+    background-color: orange;
+}
+
+#peach {
+    background-color: peachpuff;
+}
+
+#yellow {
+    background-color: yellow;
+}
+
+#green {
+    background-color: green;
+}
+
+#blue {
+    background-color: blue;
+}
+
+#purple {
+    background-color: purple;
+}
+
+#brown {
+    background-color: saddlebrown;
+}
+
+#black {
+    background-color: black;
 }

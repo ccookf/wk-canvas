@@ -16,17 +16,37 @@
 
 	<body>
 		<div class="ui-container">
-            <div id="zoomout" class="ui-buttons">( - )</div>
-            <div id="zoomin" class="ui-buttons">(+)</div>
-            <div id="reset" class="ui-buttons">Reset</div>
-            <div id="coordinates" class="ui-text">( X, Y )</div>
+            <div>
+                <div id="zoomout" class="ui-buttons">( - )</div>
+                <div id="zoomin" class="ui-buttons">(+)</div>
+                <div id="reset" class="ui-buttons">Reset</div>
+                <div id="save" class="ui-buttons">Save</div>
+                <div id="coordinates" class="ui-text">( X, Y )</div>
+            </div>
+            <div>
+                <div id="white" class="default-colors"></div>
+                <div id="red" class="default-colors"></div>
+                <div id="orange" class="default-colors"></div>
+                <div id="peach" class="default-colors"></div>
+                <div id="yellow" class="default-colors"></div>
+                <div id="green" class="default-colors"></div>
+                <div id="blue" class="default-colors"></div>
+                <div id="purple" class="default-colors"></div>
+                <div id="brown" class="default-colors"></div>
+                <div id="black" class="default-colors"></div>
+            </div>
+            <div>
+                <input type="color" id="color-picker" value="#80ffff"></input>
+            </div>
         </div>
         
         <canvas id="paint" width="512" height="512">
 			Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
 		</canvas>
 
+        <!--Hidden elements-->
         <canvas id="image" width="128" height="128" hidden></canvas>
+        <a id="save-link" hidden download='canvas.png'></a>
 	</body>
 
     <script src="canvas.js"></script>

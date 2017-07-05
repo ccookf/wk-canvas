@@ -9,7 +9,7 @@ node, express, socket.io, node-png
 
 ## Client
 
-socket.io, jQuery
+socket.io, jQuery       
 
 ### Todo list - 0.1.0
 
@@ -27,7 +27,7 @@ Color selector
 ~~Reset position/zoom~~
 API key dialogues
 Connection status dialogues
-Save button
+~~Save button~~
 Display pixel guidelines
 
 Server:

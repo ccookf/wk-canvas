@@ -32,11 +32,12 @@ var scale_level = 0;
 var pos = { x: 0, y: 0 };
 var isMouseDown = false;
 var isDragMode = false;
+var isGuideMode = false;
 var dragThreshold = 25; //Number of pixels before mousedown is treated as a drag
 var downCoords = { x: 0, y: 0 }; //Coordinates of mousedown event
 var mouseOverPixel = { x: 0, y: 0 }; //Current "pixel" under the mouse
 
-var paintColor = { r: 0, g: 255, b: 0 };
+var paintColor = { r: 128, g: 255, b: 255 };
 
 // Source data, specifications
 var BOUNDARY_WIDTH = 128;
@@ -123,6 +124,33 @@ function wheelHandler(e) {
 $("#zoomout").click(zoomOut);
 $("#zoomin").click(zoomIn);
 $("#reset").click(resetView);
+$("#save").click(()=>{
+	var link = document.getElementById('save-link');
+	link.setAttribute('href', image.toDataURL());
+	link.click();
+});
+
+//I would look up how to do this with jquery, but the net is down and I'd rather make progress
+var picker = document.getElementById("color-picker");
+picker.addEventListener("change", (e)=> {
+	var hex = e.target.value;
+	paintColor.r = parseInt(hex.slice(1, 3), 16);
+	paintColor.g = parseInt(hex.slice(3, 5), 16);
+	paintColor.b = parseInt(hex.slice(5, 7), 16);
+	console.log(paintColor);
+});
+
+//Default colors
+$("#white").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 255 	};});
+$("#red").click(()=>{ 		paintColor = { r: 255, 	g: 0, 		b: 0 	};});
+$("#orange").click(()=>{ 	paintColor = { r: 255, 	g: 165, 	b: 0 	};});
+$("#peach").click(()=>{ 	paintColor = { r: 255, 	g: 218, 	b: 185 	};});
+$("#yellow").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 0 	};});
+$("#green").click(()=>{ 	paintColor = { r: 0, 	g: 128, 	b: 0 	};});
+$("#blue").click(()=>{ 		paintColor = { r: 0, 	g: 0, 		b: 255 	};});
+$("#purple").click(()=>{ 	paintColor = { r: 128, 	g: 0, 		b: 128 	};});
+$("#brown").click(()=>{ 	paintColor = { r: 139, 	g: 69, 		b: 19 	};});
+$("#black").click(()=>{ 	paintColor = { r: 0, 	g: 0, 		b: 0 	};});
 
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
@@ -143,7 +171,7 @@ canvas.addEventListener("mouseup", ()=>{
 canvas.addEventListener("mousemove", mouseMove);
 
 // Keyboard events
-window.addEventListener("keydown", (e)=>{
+window.addEventListener("keyup", (e)=>{
 	switch (e.key) {
 		case "-":
 			zoomOut();
@@ -153,6 +181,11 @@ window.addEventListener("keydown", (e)=>{
 			break;
 		case "0":
 			resetView();
+			break;
+		case " ":
+			isGuideMode = !isGuideMode;
+			console.log("Guide Mode: " + isGuideMode);
+			updateCanvas();
 			break;
 		default:
 			if (debug_mode) console.log("Unexpected keyboard event: " + e.key);
@@ -164,10 +197,39 @@ window.addEventListener("keydown", (e)=>{
 ///// Functions ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function updateCanvas() {
+function updateCanvas(callback) {
 	clearCanvas();
 	ctx.drawImage(	image, offset.x, offset.y, 
 					BOUNDARY_WIDTH * scale[scale_level], BOUNDARY_HEIGHT * scale[scale_level]);
+
+	if (isGuideMode && scale_level >= 3) {
+		//determine the total steps on screen
+		var zoom = scale[scale_level];
+		var steps = { x: canvas.width / zoom, y: canvas.height / zoom };
+
+		//Align the grid the pixels of the image
+		var start = {};
+		start.x = 0 + Math.floor(offset.x % zoom);
+		start.y = 0 + Math.floor(offset.y % zoom);
+
+		//Vertical lines
+		ctx.beginPath();
+		ctx.strokeStyle = 'rgba(32, 32, 32, 0.2)';
+		for (i = 0; i <= steps.x + 1; i++) {
+			ctx.moveTo(start.x + zoom * i, start.y);
+			ctx.lineTo(start.x + zoom * i, canvas.height);
+		}
+
+		//Horizontal lines
+		for (i = 0; i <= steps.y + 1; i++) {
+			ctx.moveTo(start.x, start.y + zoom * i);
+			ctx.lineTo(canvas.width, start.y + zoom * i);
+		}
+		ctx.closePath();
+		ctx.stroke();
+	}
+
+	if (callback) { callback(true); }
 }
 
 function clearCanvas() {
@@ -259,13 +321,14 @@ function mouseMove(e) {
 	//Preview pixel placement
 	localCoord = canvasToImageCoordinate(x, y);
 	if (localCoord.x != mouseOverPixel.x || localCoord.y != mouseOverPixel.y) {
-		//Draw the image state back onto the canvas, clearing out temp items
-		updateCanvas();
 		//Convert local coordinates to canvas space
 		canvasCoord = imageToCanvasCoordinate(localCoord.x, localCoord.y);
-		//Draw directly to the main canvas, not the image
-		ctx.fillStyle = 'rgb(' + paintColor.r + ',' + paintColor.g + ',' + paintColor.b + ')';
-		ctx.fillRect(canvasCoord.x, canvasCoord.y, 1 * scale[scale_level], 1 * scale[scale_level]);
+		//Draw the image state back onto the canvas, clearing out temp items
+		updateCanvas((finished)=>{
+			//Draw directly to the main canvas, not the image
+			ctx.fillStyle = 'rgb(' + paintColor.r + ',' + paintColor.g + ',' + paintColor.b + ')';
+			ctx.fillRect(canvasCoord.x, canvasCoord.y, 1 * scale[scale_level], 1 * scale[scale_level]);
+		});
 	}
 
 	//Display the mouse coordinates
