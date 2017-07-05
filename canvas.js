@@ -18,6 +18,7 @@ var pos = { x: 0, y: 0 };
 var isMouseDown = false;
 var isDragMode = false;
 var isGuideMode = false;
+var isAltHeld = false;
 var dragThreshold = 25; //Number of pixels before mousedown is treated as a drag
 var downCoords = { x: 0, y: 0 }; //Coordinates of mousedown event
 var mouseOverPixel = { x: 0, y: 0 }; //Current "pixel" under the mouse
@@ -203,7 +204,7 @@ canvas.addEventListener("mouseleave", ()=>{
 	updateCanvas(); //Remove the pixel preview, even across windows
 });
 canvas.addEventListener("mouseup", ()=>{
-	if (!isDragMode) paint();
+	if (!isDragMode && !isAltHeld) paint();
 
 	isMouseDown = false;
 });
@@ -235,11 +236,21 @@ window.addEventListener("keydown", (e)=>{
 	switch (e.key) {
 		case "Alt":
 			updateCanvas(); //clears out temp drawings for pick mode
+			isAltHeld = true;
 			break;
 		default:
 			//do nothing
 	}
-})
+});
+window.addEventListener("keyup", (e)=>{
+	switch (e.key) {
+		case "Alt":
+			isAltHeld = false;
+			break;
+		default:
+			//do nothing
+	}
+});
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Functions ///////////////////////////////////////////////////////////////////////////////////
