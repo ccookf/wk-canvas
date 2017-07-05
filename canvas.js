@@ -170,16 +170,16 @@ $("#color-picker").change(()=>{
 });
 
 //Default colors
-$("#white").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 255 	};});
-$("#red").click(()=>{ 		paintColor = { r: 255, 	g: 0, 		b: 0 	};});
-$("#orange").click(()=>{ 	paintColor = { r: 255, 	g: 165, 	b: 0 	};});
-$("#peach").click(()=>{ 	paintColor = { r: 255, 	g: 218, 	b: 185 	};});
-$("#yellow").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 0 	};});
-$("#green").click(()=>{ 	paintColor = { r: 0, 	g: 128, 	b: 0 	};});
-$("#blue").click(()=>{ 		paintColor = { r: 0, 	g: 0, 		b: 255 	};});
-$("#purple").click(()=>{ 	paintColor = { r: 128, 	g: 0, 		b: 128 	};});
-$("#brown").click(()=>{ 	paintColor = { r: 139, 	g: 69, 		b: 19 	};});
-$("#black").click(()=>{ 	paintColor = { r: 0, 	g: 0, 		b: 0 	};});
+$("#white").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 255 	};	updateColorPicker();});
+$("#red").click(()=>{ 		paintColor = { r: 255, 	g: 0, 		b: 0 	};	updateColorPicker();});
+$("#orange").click(()=>{ 	paintColor = { r: 255, 	g: 165, 	b: 0 	};	updateColorPicker();});
+$("#peach").click(()=>{ 	paintColor = { r: 255, 	g: 218, 	b: 185 	};	updateColorPicker();});
+$("#yellow").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 0 	};	updateColorPicker();});
+$("#green").click(()=>{ 	paintColor = { r: 0, 	g: 128, 	b: 0 	};	updateColorPicker();});
+$("#blue").click(()=>{ 		paintColor = { r: 0, 	g: 0, 		b: 255 	};	updateColorPicker();});
+$("#purple").click(()=>{ 	paintColor = { r: 128, 	g: 0, 		b: 128 	};	updateColorPicker();});
+$("#brown").click(()=>{ 	paintColor = { r: 139, 	g: 69, 		b: 19 	};	updateColorPicker();});
+$("#black").click(()=>{ 	paintColor = { r: 0, 	g: 0, 		b: 0 	};	updateColorPicker();});
 
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
@@ -189,6 +189,7 @@ canvas.addEventListener("mousedown", (e)=>{
 			paintColor.r = pick[0];
 			paintColor.g = pick[1];
 			paintColor.b = pick[2];
+			updateColorPicker();
 		} catch (e) { error("Failed to pick color: " + e.message); }
 	} else {
 		isMouseDown = true;
@@ -402,6 +403,24 @@ function mouseMove(e) {
 			updateCanvas();
 		}
 	}
+}
+
+function colorToHex(color) {
+	var out = "#";
+	out += decToHexPadded(color.r);
+	out += decToHexPadded(color.g);
+	out += decToHexPadded(color.b);
+	return out;
+}
+
+function decToHexPadded(number) {
+	number = number.toString(16);
+	number = number.length == 1 ? "0" + number : number;
+	return number;
+}
+
+function updateColorPicker() {
+	$("#color-picker").val(colorToHex(paintColor));
 }
 
 function error(message) {
