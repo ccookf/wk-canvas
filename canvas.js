@@ -153,10 +153,9 @@ $("#save").click(()=>{
 	link.click();
 });
 
-//I would look up how to do this with jquery, but the net is down and I'd rather make progress
 var picker = document.getElementById("color-picker");
-picker.addEventListener("change", (e)=> {
-	var hex = e.target.value;
+$("#color-picker").click(()=>{
+	var hex = $("#color-picker").val();
 	paintColor.r = parseInt(hex.slice(1, 3), 16);
 	paintColor.g = parseInt(hex.slice(3, 5), 16);
 	paintColor.b = parseInt(hex.slice(5, 7), 16);
@@ -327,8 +326,6 @@ function paint() {
 	var color = new Uint8Array([paintColor.r, paintColor.g, paintColor.b]);
 	var out = { color: color, pos: { x: localCoord.x, y: localCoord.y }};
 	
-	console.log(out);
-
 	//Don't paint the pixel until the server verifies its fine and announces it
 	socket.emit('paint', out);
 }
