@@ -164,6 +164,10 @@ io.on('connection', (socket)=>{
             });
         }
     });
+
+    socket.on('disconnect', ()=>{
+        sockets[socket.id] = null;
+    });
 });
 
 http.listen(port, ()=>{

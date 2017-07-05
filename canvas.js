@@ -1,6 +1,6 @@
 console.log("canvas script loading...");
 if (window.jQuery) console.log("jQuery loaded.");
-else console.error("jQuery has not loaded");
+else error("jQuery has not loaded");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Initiation //////////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@ var debug_mode = false;
 var scale = [1, 2, 4, 8, 16, 32, 64];
 
 var offset = { x: 0, y: 0 };
-var scale_level = 0;
+var scale_level = 2;
 
 var pos = { x: 0, y: 0 };
 var isMouseDown = false;
@@ -85,7 +85,7 @@ socket.on('connect', ()=>{
 });
 
 socket.on('disconnect', ()=>{
-	console.error('Disconnected from server.');
+	error('Disconnected from server.');
 });
 
 var isValidUser = false; 
@@ -161,6 +161,13 @@ $("#color-picker").click(()=>{
 	paintColor.b = parseInt(hex.slice(5, 7), 16);
 	console.log(paintColor);
 });
+$("#color-picker").change(()=>{
+	var hex = $("#color-picker").val();
+	paintColor.r = parseInt(hex.slice(1, 3), 16);
+	paintColor.g = parseInt(hex.slice(3, 5), 16);
+	paintColor.b = parseInt(hex.slice(5, 7), 16);
+	console.log(paintColor);
+});
 
 //Default colors
 $("#white").click(()=>{ 	paintColor = { r: 255, 	g: 255, 	b: 255 	};});
@@ -176,10 +183,19 @@ $("#black").click(()=>{ 	paintColor = { r: 0, 	g: 0, 		b: 0 	};});
 
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
-	isMouseDown = true;
-	isDragMode = false;
-	downCoords.x = e.layerX;
-	downCoords.y = e.layerY;
+	if (e.altKey) {
+		try {
+			var pick = (ctx.getImageData(e.layerX, e.layerY, 1, 1)).data;
+			paintColor.r = pick[0];
+			paintColor.g = pick[1];
+			paintColor.b = pick[2];
+		} catch (e) { error("Failed to pick color: " + e.message); }
+	} else {
+		isMouseDown = true;
+		isDragMode = false;
+		downCoords.x = e.layerX;
+		downCoords.y = e.layerY;
+	}
 });
 canvas.addEventListener("mouseleave", ()=>{
 	isMouseDown = false;
@@ -214,6 +230,15 @@ window.addEventListener("keyup", (e)=>{
 			return;
 	}
 });
+window.addEventListener("keydown", (e)=>{
+	switch (e.key) {
+		case "Alt":
+			updateCanvas(); //clears out temp drawings for pick mode
+			break;
+		default:
+			//do nothing
+	}
+})
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Functions ///////////////////////////////////////////////////////////////////////////////////
@@ -342,9 +367,9 @@ function mouseMove(e) {
 	var x = e.layerX;
 	var y = e.layerY;
 
-	//Preview pixel placement
+	//Preview pixel placement. Do not display when using color pick (alt key)
 	localCoord = canvasToImageCoordinate(x, y);
-	if (localCoord.x != mouseOverPixel.x || localCoord.y != mouseOverPixel.y) {
+	if (!e.altKey && (localCoord.x != mouseOverPixel.x || localCoord.y != mouseOverPixel.y)) {
 		//Convert local coordinates to canvas space
 		canvasCoord = imageToCanvasCoordinate(localCoord.x, localCoord.y);
 		//Draw the image state back onto the canvas, clearing out temp items
@@ -380,5 +405,5 @@ function mouseMove(e) {
 }
 
 function error(message) {
-	console.error(message);
+	console.log(message);
 }
