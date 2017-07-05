@@ -56,6 +56,8 @@ function pushPaint(data) {
     changes++;
     canvas[data.pos.y][data.pos.x] = data.color;
 
+    console.log(data);
+
     if (changes >= BACKUP_THRESHOLD) {
         //At some point I may want to lock data. Need to look into 
         //possible concurrency issues later
@@ -97,6 +99,10 @@ app.get('/canvas', (req, res)=>{
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Socket events ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+var https = require('https');
+var verified = [];
+var sockets = [];
+
 io.on('connection', (socket)=>{
     console.log('connection');
 
@@ -105,8 +111,58 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('paint', (data)=>{
-        pushPaint(data);
-        io.emit('paint', data);
+        if (verified[sockets[socket.id]]) {
+            pushPaint(data);
+            io.emit('paint', data);
+        }
+    });
+
+    socket.on('verify', (apiKey, callback)=>{
+        console.log('Received verification request for ' + apiKey);
+        if (verified[apiKey] == true) {
+            console.log('Returning user verified');
+            sockets[socket.id] = apiKey;
+            callback(true, "You should never see this.");
+            return;
+        } else {
+            console.log(apiKey + ' has not been verified. Pulling WK data.');
+            var path = 'https://www.wanikani.com/api/user/'+ apiKey + '/user-information'
+            https.get(path, (res)=>{
+                var body = '';
+                res.on('data', (d)=>{
+                    body += d;
+                });
+                res.on('end', ()=>{
+                    console.log("Finished loading WK data for user " + apiKey);
+                    try {
+                        var user = JSON.parse(body).user_information;
+                        if (user == null) {
+                            console.log('User data was null.');
+                            callback(false, "Failed to get user data.");
+                            return;
+                        } else if (user.level > 3) {
+                            console.log('User is valid.');
+                            callback(true, "You should never see this.");
+                            verified[apiKey] = true;
+                            sockets[socket.id] = apiKey;
+                            return;
+                        } else if (user.level < 4) {
+                            console.log('User is low level.');
+                            callback(false, "Users must be at least level 4.");
+                            return;
+                        }
+                    } catch (e) {
+                        console.log(e);
+                        callback(false, "Unexpected error.");
+                        return;
+                    }
+                });
+            }).on('error', (e)=>{
+                console.error(e);
+                callback(false, "Something really bad happened.");
+                return;
+            });
+        }
     });
 });
 

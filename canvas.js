@@ -8,21 +8,6 @@ else console.error("jQuery has not loaded");
 
 var server = "http://localhost:4242";
 
-// User data
-var user_wk_api_key = "e76ae77aa086d5b9896ea32f37d6d14e";
-var isValidUser = false;
-var user;
-/*$.get("https://www.wanikani.com/api/user/" + user_wk_api_key + "/user-information", (res)=>{
-	if (res) {
-		user = res.user_information;
-		if (user.level >= 4) isValidUser = true;
-		else console.warn("User is not level 4 or higher.");
-		//Note to self, remember to blacklist the public test key
-		//when I do the server validation
-	}
-	else console.warn("Failed to get WK user data.");
-});*/
-
 var debug_mode = false;
 var scale = [1, 2, 4, 8, 16, 32, 64];
 
@@ -38,10 +23,6 @@ var downCoords = { x: 0, y: 0 }; //Coordinates of mousedown event
 var mouseOverPixel = { x: 0, y: 0 }; //Current "pixel" under the mouse
 
 var paintColor = { r: 128, g: 255, b: 255 };
-
-// Source data, specifications
-var BOUNDARY_WIDTH = 128;
-var BOUNDARY_HEIGHT = 128;
 
 // Canvas and image data
 var canvas = document.getElementById("paint");
@@ -99,11 +80,53 @@ socket.on('connect', ()=>{
 			}
 		}
 		resetView();
+		autoLogin();
 	});
 });
 
 socket.on('disconnect', ()=>{
 	console.error('Disconnected from server.');
+});
+
+var isValidUser = false; 
+
+// User data
+var apiKey = localStorage.getItem("wk-api-key");
+
+function autoLogin() {
+	if (apiKey == null) {
+		$("#login").removeClass("hidden");
+	} else {
+		socket.emit("verify", apiKey, (res, err)=>{
+			if (res == true) {
+				isValidUser = true;
+				$("#login").addClass("hidden");
+				alert('Welcome back!');
+			} else {
+				if (confirm("Login failed. Keep API key in storage?") == false) {
+					localStorage.removeItem("wk-api-key");
+				}
+			}
+		});
+	}
+}
+
+$("#login").click(()=>{
+	var apiKey = prompt("Please enter your WaniKani API Key");
+
+	if (apiKey == null || apiKey == "") return;
+	else {
+		socket.emit("verify", apiKey, (res, err)=>{
+			if (res == true) {
+				localStorage.setItem("wk-api-key", apiKey);
+				isValidUser = true;
+				alert('Welcome!');
+				$("#login").addClass("hidden");
+			} else {
+				alert("Failed to validate user: " + err);
+			}
+		});
+	}
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +223,7 @@ window.addEventListener("keyup", (e)=>{
 function updateCanvas(callback) {
 	clearCanvas();
 	ctx.drawImage(	image, offset.x, offset.y, 
-					BOUNDARY_WIDTH * scale[scale_level], BOUNDARY_HEIGHT * scale[scale_level]);
+					image.width * scale[scale_level], image.height * scale[scale_level]);
 
 	if (isGuideMode && scale_level >= 3) {
 		//determine the total steps on screen
@@ -295,6 +318,7 @@ function imageToCanvasCoordinate(x, y) {
 }
 
 function paint() {
+	if (isValidUser == false) return;
 	if (debug_mode) console.log('Paint applied to coordinate: ('+ downCoords.x + ', ' + downCoords.y + ')');
 	//Convert canvas point to image space
 	localCoord = canvasToImageCoordinate(downCoords.x, downCoords.y);
@@ -303,12 +327,15 @@ function paint() {
 	var color = new Uint8Array([paintColor.r, paintColor.g, paintColor.b]);
 	var out = { color: color, pos: { x: localCoord.x, y: localCoord.y }};
 	
+	console.log(out);
+
 	//Don't paint the pixel until the server verifies its fine and announces it
 	socket.emit('paint', out);
 }
 
 //Server announcing the paint from above function
 socket.on('paint', (data)=>{
+	console.log(data);
 	ictx.fillStyle = 'rgb(' + data.color[0] + ',' + data.color[1] + ',' + data.color[2] + ')';
 	ictx.fillRect(data.pos.x, data.pos.y, 1, 1);
 	updateCanvas();

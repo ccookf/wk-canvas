@@ -1,3 +1,7 @@
+/**********************************************************
+    General
+**********************************************************/
+
 body {
     background-color: grey;
     margin: 0;
@@ -8,6 +12,36 @@ body {
 #paint, #image {
     background-color: white;
 }
+
+.hidden {
+    display: none;
+}
+
+/**********************************************************
+    Login
+**********************************************************/
+
+#login {
+    position: fixed;
+    right: 0;
+    width: 5em;
+    background: rgba(0,0,0,1);
+    color: white;
+    padding: 0.5em 1em;
+    margin: 0;
+}
+
+#login:hover {
+    background-color: #555;
+}
+
+#login:active {
+    background-color: black;
+}
+
+/**********************************************************
+    UI
+**********************************************************/
 
 .ui-container {
     position: fixed;
@@ -35,6 +69,10 @@ body {
     margin: 0;
     min-width: 5em;
 }
+
+/**********************************************************
+    Colors
+**********************************************************/
 
 #color-picker {
     width: 100%;

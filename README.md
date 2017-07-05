@@ -21,19 +21,19 @@ Client:
 
 Client UI:
 
-Color selector
+~~Color selector~~
 ~~Zoom in/out buttons~~
 ~~Display coordinates~~
 ~~Reset position/zoom~~
-API key dialogues
+~~API key dialogues~~
 Connection status dialogues
 ~~Save button~~
-Display pixel guidelines
+~~Display pixel guidelines~~
 
 Server:
 
-API key verification
-Paint verification
+~~API key verification~~
+~~Paint verification~~
 
 Deployment:
 
