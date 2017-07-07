@@ -6,7 +6,9 @@ else error("jQuery has not loaded");
 ///// Initiation //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-var server = "http://ccookf.com:4242";
+//var server = "http://ccookf.com:4242";
+var server = "http://localhost:4242";
+var isValidUser = false; 
 
 var debug_mode = false;
 var scale = [1, 2, 4, 8, 16, 32, 64];
@@ -64,32 +66,59 @@ var socket = io(server);
 socket.on('connect', ()=>{
 	console.log("Connected to server successfully");
 
-	socket.emit('getcanvas', (data)=>{
+	socket.emit('get_canvas', (data)=>{
 
 		if (!data) { error("Failed to retreive canvas data."); return; }
 
-		//Set the size of the canvas hosting the image to match the data
-		image.height = data.length;
-		image.width = data[0].length;
+		console.log(data);
 
-		for (var y = 0; y < data.length; y++) {
-			for (var x = 0; x < data[y].length; x++) {
-				color = data[y][x]; //Uint8Array [r, g, b]
-				if (!color) { error("Data coordinate missing color data!"); continue; }
-				ictx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
-				ictx.fillRect(x, y, 1, 1);
+		//Set the size of the canvas hosting the image to match the data
+		image.height = data.height;
+		image.width = data.width;
+		resetView(); //Sets the canvas offets
+		initImage();
+
+		initChunks(data.height, data.width, data.CHUNK_SIZE);
+		
+		var topLeft = canvasToImageCoordinate(0,0);
+		var bottomRight = canvasToImageCoordinate(canvas.width, canvas.height);
+		var ul = findUnloadedChunks(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+		var center = canvasToImageCoordinate(canvas.width/2, canvas.height/2);
+		sortUnloadedChunks(ul, center.x, center.y);
+
+		var count = 0;
+		//loadChunk(0,1,ictx,(res)=>{});
+		setInterval(()=>{
+			if (count < ul.length) {
+				loadChunk(ul[count].row, ul[count].column, ictx, (res)=>{
+					if (res == false) console.error("Failed to load chunk " + 
+													ul[count].column + ", " + ul[count.row]);
+				});
+				count++;
 			}
-		}
+		}, 50);
+		
+		// //Set the size of the canvas hosting the image to match the data
+		// image.height = data.length;
+		// image.width = data[0].length;
+
+		// for (var y = 0; y < data.length; y++) {
+		// 	for (var x = 0; x < data[y].length; x++) {
+		// 		color = data[y][x]; //Uint8Array [r, g, b]
+		// 		if (!color) { error("Data coordinate missing color data!"); continue; }
+		// 		ictx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
+		// 		ictx.fillRect(x, y, 1, 1);
+		// 	}
+		// }
 		resetView();
-		autoLogin();
 	});
+
+	autoLogin();
 });
 
 socket.on('disconnect', ()=>{
 	error('Disconnected from server.');
 });
-
-var isValidUser = false; 
 
 // User data
 var apiKey = localStorage.getItem("wk-api-key");
@@ -102,7 +131,7 @@ function autoLogin() {
 			if (res == true) {
 				isValidUser = true;
 				$("#login").addClass("hidden");
-				alert('Welcome back!');
+				console.log('Welcome back!');
 			} else {
 				if (confirm("Login failed. Keep API key in storage?") == false) {
 					localStorage.removeItem("wk-api-key");
@@ -294,6 +323,11 @@ function updateCanvas(callback) {
 function clearCanvas() {
 	ctx.fillStyle = "grey";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function initImage() {
+	ictx.fillStyle = "black";
+	ictx.fillRect(0, 0, image.width, image.height);
 }
 
 function resetView() {

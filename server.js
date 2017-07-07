@@ -7,11 +7,12 @@ var io = require('socket.io')(http);
 var port = 4242;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-///// Load the image into memory //////////////////////////////////////////////////////////////////
+///// Canvas management ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 var CANVAS_WIDTH = 128;
 var CANVAS_HEIGHT = 128;
+var CHUNK_SIZE = 32;
 var canvas = [];
 var filename = 'test.png';
 
@@ -106,8 +107,33 @@ var sockets = [];
 io.on('connection', (socket)=>{
     console.log('connection');
 
-    socket.on('getcanvas', (callback)=>{
-        callback(canvas);
+    // socket.on('getcanvas', (callback)=>{
+    //     callback(canvas);
+    // });
+
+    socket.on('get_canvas', (callback)=>{
+        var out = { 
+            height: canvas.length, 
+            width: canvas[0].length, 
+            CHUNK_SIZE: CHUNK_SIZE 
+        };
+        callback(out);
+    });
+
+    socket.on('get_chunk', (data, callback)=>{
+        //Convert from chunk space to image space
+        var x = data.x * CHUNK_SIZE; //row
+        var y = data.y * CHUNK_SIZE; //column
+
+        var out = [];
+
+        for (var i = 0; i < CHUNK_SIZE; i++) { //for each row
+            out[i] = [];
+            for (var j = 0; j < CHUNK_SIZE; j++) { //for each column
+                out[i].push(canvas[i + x][j + y]);
+            }
+        }
+        callback(out);
     });
 
     socket.on('paint', (data)=>{
