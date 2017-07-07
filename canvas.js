@@ -14,7 +14,7 @@ var debug_mode = false;
 var scale = [1, 2, 4, 8, 16, 32, 64];
 
 var offset = { x: 0, y: 0 };
-var scale_level = 2;
+var scale_level = 4;
 
 var pos = { x: 0, y: 0 };
 var isMouseDown = false;
@@ -29,7 +29,6 @@ var paintColor = { r: 128, g: 255, b: 255 };
 
 // Canvas and image data
 var canvas = document.getElementById("paint");
-
 var ctx = canvas.getContext("2d");
 
 //Set initial dimensions of the canvas to match the window
@@ -80,37 +79,7 @@ socket.on('connect', ()=>{
 
 		initChunks(data.height, data.width, data.CHUNK_SIZE);
 		
-		var topLeft = canvasToImageCoordinate(0,0);
-		var bottomRight = canvasToImageCoordinate(canvas.width, canvas.height);
-		var ul = findUnloadedChunks(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
-		var center = canvasToImageCoordinate(canvas.width/2, canvas.height/2);
-		sortUnloadedChunks(ul, center.x, center.y);
-
-		var count = 0;
-		//loadChunk(0,1,ictx,(res)=>{});
-		setInterval(()=>{
-			if (count < ul.length) {
-				loadChunk(ul[count].row, ul[count].column, ictx, (res)=>{
-					if (res == false) console.error("Failed to load chunk " + 
-													ul[count].column + ", " + ul[count.row]);
-				});
-				count++;
-			}
-		}, 50);
-		
-		// //Set the size of the canvas hosting the image to match the data
-		// image.height = data.length;
-		// image.width = data[0].length;
-
-		// for (var y = 0; y < data.length; y++) {
-		// 	for (var x = 0; x < data[y].length; x++) {
-		// 		color = data[y][x]; //Uint8Array [r, g, b]
-		// 		if (!color) { error("Data coordinate missing color data!"); continue; }
-		// 		ictx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
-		// 		ictx.fillRect(x, y, 1, 1);
-		// 	}
-		// }
-		resetView();
+		checkUnloadedChunks();
 	});
 
 	autoLogin();
@@ -354,6 +323,7 @@ function zoomIn() {
 		offset.y = canvas.height/2 - localCoord.y * zoom;
 	}
 	updateCanvas();
+	checkUnloadedChunks();
 }
 
 function zoomOut() {
@@ -367,6 +337,7 @@ function zoomOut() {
 		offset.y = canvas.height/2 - localCoord.y * zoom;
 	}
 	updateCanvas();
+	checkUnloadedChunks();
 }
 
 function canvasToImageCoordinate(x, y) {
@@ -446,6 +417,7 @@ function mouseMove(e) {
 			downCoords.x = x;
 
 			updateCanvas();
+			checkUnloadedChunks();
 		}
 	}
 }
@@ -466,6 +438,23 @@ function decToHexPadded(number) {
 
 function updateColorPicker() {
 	$("#color-picker").val(colorToHex(paintColor));
+}
+
+var isLoadingChunks = false;
+function checkUnloadedChunks() {
+	var topLeft = canvasToImageCoordinate(0,0);
+	var bottomRight = canvasToImageCoordinate(canvas.width, canvas.height);
+	var ul = findUnloadedChunks(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+	
+	if ((ul.length != 0) && (isLoadingChunks == false)) {
+		var center = canvasToImageCoordinate(canvas.width/2, canvas.height/2);
+		sortUnloadedChunks(ul, center.x, center.y);
+		isLoadingChunks = true;
+		loadChunks(ul, ictx, (res)=>{
+			isLoadingChunks = false;
+			console.log("Finished loading chunks.");
+		});
+	}
 }
 
 function error(message) {

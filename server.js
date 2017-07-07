@@ -133,6 +133,7 @@ io.on('connection', (socket)=>{
                 out[i].push(canvas[i + x][j + y]);
             }
         }
+        console.log("Served chunk request (" + data.x + ", " + data.y +")");
         callback(out);
     });
 

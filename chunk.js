@@ -25,7 +25,7 @@ function initChunks(height, width, size) {
     for (var i = 0; i < rows; i++) {
         chunks.push([]); //start a new row
         for (var j = 0; j < rows; j++) {
-            chunks[i].push({ column: i, row: j, isLoaded: false });
+            chunks[i].push({ column: j, row: i, isLoaded: false });
         }
     }
 
@@ -39,15 +39,13 @@ function initChunks(height, width, size) {
  * @param {number} a Bottom right of canvas in image space
  * @param {number} b Bottom right of canvas in image space
  */
-function findUnloadedChunks(x, y, a, b) {
-
-console.log({x: x, y: y, a: a, b: b});
+function findUnloadedChunks(x, y, a, b, display = false) {
 
     //Convert image space coordinates to the chunk space
     var left = Math.floor(x / CHUNK_SIZE);
     var top = Math.floor(y / CHUNK_SIZE);
-    var right = Math.floor(a / CHUNK_SIZE);
-    var bottom = Math.floor(b / CHUNK_SIZE);
+    var right = Math.floor(a / CHUNK_SIZE) + 1;
+    var bottom = Math.floor(b / CHUNK_SIZE) + 1;
 
     //console.log({left: left, top: top, right: right, bottom: bottom});
 
@@ -66,12 +64,13 @@ console.log({x: x, y: y, a: a, b: b});
             if ((chunks[i][j]).isLoaded == false) out.push(chunks[i][j]);
         }
     }
+    if (display) console.log("Found " + out.length + " unloaded chunks.");
     return out;
 }
 
 /**
  * @description Sort an array of chunks by distance from a point in image space
- * @param {Array} unsorted 
+ * @param {Array} unsorted Array of image chunks
  * @param {number} x 
  * @param {number} y 
  */
@@ -90,7 +89,32 @@ function sortUnloadedChunks(unsorted, x, y) {
     return unsorted; //for debug
 }
 
-function loadChunk(row, column, context, callback) {
+/**
+ * @Description recursively loads all chunks in the list one at a time
+ * @param {Array} list  Sorted array of chunks
+ * @param {CanvasRenderingContext2D} context Should be ictx
+ */
+function loadChunks(list, context, callback) {
+    if (list.length == 0) {
+        callback(true);
+        return;
+    }
+    var chunk = list.shift(); //When sorted the list is ascending.
+    loadChunk(chunk.column, chunk.row, context, (res)=>{
+        console.log("Chunk (" + chunk.column + ", " + chunk.row + ") loaded: " + res);
+        loadChunks(list, context, callback);
+    });
+}
+
+/**
+ * @description Loads the chunk at the specified coordinates in the given canvas context
+ * @param {number} column 
+ * @param {number} row 
+ * @param {CanvasRenderingContext2D} context Should be ictx
+ * @param {function} callback Will return true if loaded
+ */
+function loadChunk(column, row, context, callback) {
+    if (chunks[row][column] == true) { console.log("Chunk already loaded!"); return; }
     socket.emit('get_chunk', { x: column, y: row }, (data)=>{
         var startx = row * CHUNK_SIZE;
         var starty = column * CHUNK_SIZE;
@@ -109,8 +133,10 @@ function loadChunk(row, column, context, callback) {
             console.log("Chunk position: " + row + ", " + column);
             console.log("Failed to load chunk: " + e.message);
             console.log(data);
-            callback(false);
+            if (callback) callback(false);
         }
+        chunks[row][column].isLoaded = true;
         updateCanvas();
+        if (callback) callback(true);
     });
 }
