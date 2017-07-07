@@ -100,8 +100,8 @@ function loadChunks(list, context, callback) {
         return;
     }
     var chunk = list.shift(); //When sorted the list is ascending.
-    loadChunk(chunk.column, chunk.row, context, (res)=>{
-        console.log("Chunk (" + chunk.column + ", " + chunk.row + ") loaded: " + res);
+    loadChunk(chunk.column, chunk.row, context, (res, time)=>{
+        console.log("Chunk (" + chunk.column + ", " + chunk.row + ") loaded: " + res + " in " + time);
         loadChunks(list, context, callback);
     });
 }
@@ -111,10 +111,11 @@ function loadChunks(list, context, callback) {
  * @param {number} column 
  * @param {number} row 
  * @param {CanvasRenderingContext2D} context Should be ictx
- * @param {function} callback Will return true if loaded
+ * @param {function} callback Will return the time to load the chunk
  */
 function loadChunk(column, row, context, callback) {
     if (chunks[row][column] == true) { console.log("Chunk already loaded!"); return; }
+    var start = Date.now();
     socket.emit('get_chunk', { x: column, y: row }, (data)=>{
         var startx = row * CHUNK_SIZE;
         var starty = column * CHUNK_SIZE;
@@ -133,10 +134,10 @@ function loadChunk(column, row, context, callback) {
             console.log("Chunk position: " + row + ", " + column);
             console.log("Failed to load chunk: " + e.message);
             console.log(data);
-            if (callback) callback(false);
+            if (callback) callback(false, (Date.now() - start) + "ms");
         }
         chunks[row][column].isLoaded = true;
         updateCanvas();
-        if (callback) callback(true);
+        if (callback) callback(true, (Date.now() - start) + "ms");
     });
 }
