@@ -6,8 +6,9 @@ else error("jQuery has not loaded");
 ///// Initiation //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//var server = "http://ccookf.com:4242";
-var server = "http://localhost:4242";
+var server = "http://ccookf.com:4242";
+//var server = "http://localhost:4242";
+var version = "0.1.1";
 var isValidUser = false; 
 
 var debug_mode = false;
@@ -70,6 +71,10 @@ socket.on('connect', ()=>{
 		if (!data) { error("Failed to retreive canvas data."); return; }
 
 		console.log(data);
+		if (data.version != version) {
+			alert("Client version mismatch. Clear your cache and reload the page. Contact the developer if the problem persists.");
+			socket.disconnect();
+		}
 
 		//Set the size of the canvas hosting the image to match the data
 		image.height = data.height;

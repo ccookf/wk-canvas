@@ -62,5 +62,5 @@ socket.io, jQuery
 
 ### Todo list - 0.1.1
 
-* Chunking the canvas
+* ~~Chunking the canvas~~
 * Pretend I'm a CSS wizard

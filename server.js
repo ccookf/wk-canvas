@@ -6,6 +6,8 @@ var io = require('socket.io')(http);
 
 var port = 4242;
 
+var version = "0.1.1";
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Canvas management ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +117,8 @@ io.on('connection', (socket)=>{
         var out = { 
             height: canvas.length, 
             width: canvas[0].length, 
-            CHUNK_SIZE: CHUNK_SIZE 
+            CHUNK_SIZE: CHUNK_SIZE,
+            version: version 
         };
         callback(out);
     });
