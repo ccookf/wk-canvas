@@ -6,8 +6,8 @@ else error("jQuery has not loaded");
 ///// Initiation //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-var server = "http://ccookf.com:4242";
-//var server = "http://localhost:4242";
+//var server = "http://ccookf.com:4242";
+var server = "http://localhost:4242";
 var version = "0.1.1";
 var isValidUser = false; 
 
@@ -48,11 +48,11 @@ function resizeDisplay() {
 $(window).resize(resizeDisplay);
 resizeDisplay(); //first time
 
-//Set the window to be unselectable
+//Set the window to be unselectable (no highlighting)
 window.onload = ()=>{
 	//If needed this can be applied per element instead of doc
 	document.onselectstart = ()=>{ return false; };
-	document.onmousedown = ()=>{ return false; };
+	//document.onmousedown = ()=>{ return false; };
 }
 
 var image = document.getElementById("image");

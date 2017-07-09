@@ -19,13 +19,13 @@
     </head>
 
 	<body>
-		<div class="ui-container">
+		<div class="paint-ui-container">
             <div>
-                <div id="zoomout" class="ui-buttons">( - )</div>
-                <div id="zoomin" class="ui-buttons">(+)</div>
-                <div id="reset" class="ui-buttons">Reset</div>
-                <div id="save" class="ui-buttons">Save</div>
-                <div id="coordinates" class="ui-text">( X, Y )</div>
+                <div id="zoomout" class="paint-ui-buttons">( - )</div>
+                <div id="zoomin" class="paint-ui-buttons">(+)</div>
+                <div id="reset" class="paint-ui-buttons">Reset</div>
+                <div id="save" class="paint-ui-buttons">Save</div>
+                <div id="coordinates" class="paint-ui-text">( X, Y )</div>
             </div>
             <div>
                 <div id="white" class="default-colors"></div>
@@ -41,6 +41,43 @@
             </div>
             <div>
                 <input type="color" id="color-picker" value="#80ffff"></input>
+            </div>
+        </div>
+
+        <div class="main-ui">
+            <div id="notifications">
+                <p>This is an important message.</p>
+            </div>
+            
+            <div id="chat-history">
+                <!-- Proper chat message format
+                <div class="chat-message">
+                    <div class="message-meta">
+                        <div class="message-user">Username</div>
+                        <div class="message-time">DateTime</div>
+                    </div>
+                    <p class="message-body">
+                        Spicy jalapeno bacon ipsum dolor amet hamburger biltong ham shoulder, rump pork chop corned beef jowl. Ground round shank kevin, biltong drumstick doner t-bone spare ribs pork belly frankfurter strip steak meatloaf porchetta. Kielbasa strip steak alcatra, cow meatball landjaeger hamburger corned beef. Porchetta drumstick turkey tri-tip.
+                    </p>
+                </div>
+                -->
+
+                <div class="chat-message">
+                    <div class="message-meta">
+                        <div class="message-user">Username</div>
+                        <div class="message-time">DateTime</div>
+                    </div>
+                    <p class="message-body">
+                        Spicy jalapeno bacon ipsum dolor amet hamburger biltong ham shoulder, rump pork chop corned beef jowl. Ground round shank kevin, biltong drumstick doner t-bone spare ribs pork belly frankfurter strip steak meatloaf porchetta. Kielbasa strip steak alcatra, cow meatball landjaeger hamburger corned beef. Porchetta drumstick turkey tri-tip.
+                    </p>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div>
+                    <input id="message-box" type="text">
+                    <button id="message-submit">Send</button>
+                </div>
             </div>
         </div>
 
