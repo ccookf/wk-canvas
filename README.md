@@ -15,7 +15,7 @@ node, express, socket.io, node-png
 
 socket.io, jQuery       
 
-### Todo list - 0.1.1
+### Todo list
 
 * ~~Chunking the canvas~~
 * Pretend I'm a CSS wizard

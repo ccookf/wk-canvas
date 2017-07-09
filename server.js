@@ -6,7 +6,7 @@ var io = require('socket.io')(http);
 
 var port = 4242;
 
-var version = "0.1.1";
+var version = "0.2.0";
 
 var https = require('https');
 var verified = [];
