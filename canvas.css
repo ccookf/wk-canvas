@@ -16,6 +16,17 @@ body {
     overflow: hidden;
 }
 
+.ui-wrap {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+.canvas-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
 #paint, #image {
     background-color: white;
 }
@@ -53,7 +64,7 @@ body {
     display: inline-block;
     padding: 0.5em 1em;
     margin: 0;
-    min-width: 5em;
+    min-width: 8em;
 }
 
 /**********************************************************
@@ -61,19 +72,34 @@ body {
 **********************************************************/
 
 .main-ui {
-    position: fixed;
     z-index: 2; /* always on top */
-    top: 0;
-    right: 0;
     width: 30%;
-    min-width: 20em;
-    height: 100%;
+    min-width: 15em;
+    flex: initial;
 
     background-color: rgba(0,0,0,1);
     color: white;
 
     display: flex;
     flex-direction: column;
+}
+
+.toggle-wrap {
+    position: relative;
+    height: 0;
+    width: 0;
+}
+
+#toggle-chat {
+    position: absolute;
+    left: -1.5em;
+    background-color: black;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+#toggle-chat p {
+    margin: 1em 0.25em;
 }
 
 #notifications-container {
@@ -158,7 +184,7 @@ body {
 }
 
 #message-box {
-    width: 75%;
+    width: 80%;
     height: 2em;
     margin: 0.1em;
     font-size: 16px;
@@ -166,7 +192,8 @@ body {
 }
 
 #message-submit {
-    min-width: 5em; /* WTB css wizard for some advice here */
+    /* WTB css wizard for some advice here */
+    width: 16%;
     height: 2em;
     font-weight: bold;
     margin: 0.1em;

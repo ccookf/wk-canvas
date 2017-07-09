@@ -34,8 +34,8 @@ var ctx = canvas.getContext("2d");
 
 //Set initial dimensions of the canvas to match the window
 function resizeDisplay() {
-	canvas.width = $(window).width();
-	canvas.height = $(window).height();
+	canvas.width = $('.canvas-wrap').width();
+	canvas.height = $('.canvas-wrap').height();
 
 	//These seem to reset when the canvas dimensions are adjusted
 	//Need to look into why later
@@ -197,6 +197,19 @@ $("#blue").click(()=>{ 		paintColor = { r: 0, 	g: 0, 		b: 255 	};	updateColorPic
 $("#purple").click(()=>{ 	paintColor = { r: 128, 	g: 0, 		b: 128 	};	updateColorPicker();});
 $("#brown").click(()=>{ 	paintColor = { r: 139, 	g: 69, 		b: 19 	};	updateColorPicker();});
 $("#black").click(()=>{ 	paintColor = { r: 0, 	g: 0, 		b: 0 	};	updateColorPicker();});
+
+// Chat toggle
+$("#toggle-chat").click(()=>{
+	var box = $(".main-ui");
+	if (box.css("width") == "0px") {
+		box.css("width", "30%");
+		box.css("min-width", "15em");
+	} else {
+		box.css("width", "0");
+		box.css("min-width", "0");
+	}
+	resizeDisplay();
+});
 
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
