@@ -11,6 +11,7 @@ var version = "0.1.1";
 var https = require('https');
 var verified = [];
 var sockets = [];
+var users = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Canvas management ///////////////////////////////////////////////////////////////////////////
@@ -97,11 +98,13 @@ function saveBackup(callback) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 var MAX_HISTORY_STORED = 10;
-var chatHistory = [];
+var chatHistory = [{username:"WK CANVAS", time:Date.now(),message:"Server was reset."}];
 
-function updateChat(message) {
+function updateChat(message, apiKey) {
+    
     var out = {};
-    out.username = "Test";
+    console.log("Message from " + apiKey);
+    out.username = verified[apiKey].username;
     out.time = Date.now();
     out.message = message;
 
@@ -161,7 +164,7 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('paint', (data)=>{
-        if (verified[sockets[socket.id]]) {
+        if (verified[sockets[socket.id]] != null) {
             pushPaint(data);
             io.emit('paint', data);
         }
@@ -169,9 +172,10 @@ io.on('connection', (socket)=>{
 
     socket.on('verify', (apiKey, callback)=>{
         console.log('Received verification request for ' + apiKey);
-        if (verified[apiKey] == true) {
+        if (verified[apiKey] && verified[apiKey].level > 3) {
             console.log('Returning user verified');
             sockets[socket.id] = apiKey;
+            users++;
             callback(true, "You should never see this.");
             return;
         } else {
@@ -186,6 +190,8 @@ io.on('connection', (socket)=>{
                     console.log("Finished loading WK data for user " + apiKey);
                     try {
                         var user = JSON.parse(body).user_information;
+                        verified[apiKey] = user;
+                        console.log("Registering user.");
                         if (user == null) {
                             console.log('User data was null.');
                             callback(false, "Failed to get user data.");
@@ -193,8 +199,8 @@ io.on('connection', (socket)=>{
                         } else if (user.level > 3) {
                             console.log('User is valid.');
                             callback(true, "You should never see this.");
-                            verified[apiKey] = true;
                             sockets[socket.id] = apiKey;
+                            users++;
                             return;
                         } else if (user.level < 4) {
                             console.log('User is low level.');
@@ -216,10 +222,9 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('send-message', (data, callback)=>{
-        console.log("Message received: ");
-        console.log(data);
-        updateChat(data);
-        callback();
+        callback(); //Informs client of receipt
+        if (!sockets[socket.id]) { console.log("Reject message: not logged in."); return; }
+        updateChat(data, sockets[socket.id]);
     });
 
     socket.on('get-history', (callback)=>{
@@ -227,9 +232,23 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('disconnect', ()=>{
-        sockets[socket.id] = null;
+        if (sockets[socket.id]) users--;
+        console.log(sockets[socket.id] + " disconnected.");
+        delete sockets[socket.id];
+    });
+
+    socket.on('logout', (callback)=>{
+        if (sockets[socket.id]) users--;
+        console.log(sockets[socket.id] + " disconnected.");
+        delete sockets[socket.id];
+        callback(true);
     });
 });
+
+//Broadcast the number of logged in users periodically
+setInterval(()=>{
+    io.emit('user-count', users);
+}, 2500);
 
 http.listen(port, ()=>{
     console.log('IO listening on port ' + port);

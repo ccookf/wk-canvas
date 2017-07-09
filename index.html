@@ -45,8 +45,11 @@
         </div>
 
         <div class="main-ui">
-            <div id="notifications">
-                <p>This is an important message.</p>
+            <div id="notifications-container">
+                <div id="notification">
+                    Important notifications
+                </div>
+                <div id="login" class="hidden">Login</div>
             </div>
             
             <div id="chat-history">
@@ -68,8 +71,6 @@
                 <button id="message-submit">Send</button>
             </form>
         </div>
-
-        <div id="login" class="hidden">Login</div>
         
         <canvas id="paint" width="512" height="512">
 			Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.

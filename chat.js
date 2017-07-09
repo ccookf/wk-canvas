@@ -26,6 +26,7 @@ function sendMessage() {
     if (isInitiated == false) { console.error("Cannot send message, chat is not initiated!"); return; }
     
     var message = $('#message-box').val();
+    if (message == "") return;
     chatSocket.emit('send-message', message, ()=>{
         //clear on server receipt
         $('#message-box').val("");

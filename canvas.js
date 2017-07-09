@@ -92,7 +92,12 @@ socket.on('connect', ()=>{
 });
 
 socket.on('disconnect', ()=>{
-	error('Disconnected from server.');
+	$("#notification").html("Disconnected!");
+});
+
+socket.on('user-count', (number)=>{
+	if (number == 1) $("#notification").html(number + " user online");
+	else $("#notification").html(number + " users online");
 });
 
 // User data
@@ -105,8 +110,7 @@ function autoLogin() {
 		socket.emit("verify", apiKey, (res, err)=>{
 			if (res == true) {
 				isValidUser = true;
-				$("#login").addClass("hidden");
-				console.log('Welcome back!');
+				$("#login").html("Logout");
 			} else {
 				if (confirm("Login failed. Keep API key in storage?") == false) {
 					localStorage.removeItem("wk-api-key");
@@ -117,20 +121,28 @@ function autoLogin() {
 }
 
 $("#login").click(()=>{
-	var apiKey = prompt("Please enter your WaniKani API Key");
-
-	if (apiKey == null || apiKey == "") return;
-	else {
-		socket.emit("verify", apiKey, (res, err)=>{
-			if (res == true) {
-				localStorage.setItem("wk-api-key", apiKey);
-				isValidUser = true;
-				alert('Welcome!');
-				$("#login").addClass("hidden");
-			} else {
-				alert("Failed to validate user: " + err);
-			}
+	if (!isValidUser) {
+		var apiKey = prompt("Please enter your WaniKani API Key");
+		if (apiKey == null || apiKey == "") return;
+		else {
+			socket.emit("verify", apiKey, (res, err)=>{
+				if (res == true) {
+					localStorage.setItem("wk-api-key", apiKey);
+					isValidUser = true;
+					$("#login").html("Logout");
+				} else {
+					alert("Failed to validate user: " + err);
+				}
+			});
+		}
+	} else {
+		console.log("Logging out");
+		socket.emit('logout', (res)=>{
+			if (!res) console.error("Problem with logout.");
 		});
+		localStorage.removeItem("wk-api-key");
+		isValidUser = false;
+		$("#login").html("Login");
 	}
 });
 
