@@ -68,36 +68,12 @@ body {
     width: 30%;
     min-width: 20em;
     height: 100%;
-}
 
-.toggle {
-    position: relative;
-    left: 0%;
-}
-
-.main-wrap {
     background-color: rgba(0,0,0,1);
     color: white;
 
     display: flex;
     flex-direction: column;
-    height: 100vh;
-}
-
-#chat-toggle {
-    position: relative;
-    width: 2em;
-    left: -2em;
-    border: 1px solid black;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
-    background-color: black;
-    color: white;
-    text-align: center;
-}
-#chat-toggle p {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
 }
 
 #notifications-container {

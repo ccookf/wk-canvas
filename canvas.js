@@ -198,19 +198,6 @@ $("#purple").click(()=>{ 	paintColor = { r: 128, 	g: 0, 		b: 128 	};	updateColor
 $("#brown").click(()=>{ 	paintColor = { r: 139, 	g: 69, 		b: 19 	};	updateColorPicker();});
 $("#black").click(()=>{ 	paintColor = { r: 0, 	g: 0, 		b: 0 	};	updateColorPicker();});
 
-// Menu toggle
-$("#chat-toggle").click(()=>{
-	var state = $('.main-wrap').css("left");
-	if (state == "0px") {
-		$('.toggle').css("left", "100%");
-		$('#toggle-direction').html("◀");
-	}
-	else {
-		$('.toggle').css("left", "0%");
-		$('#toggle-direction').html("▶");
-	}
-});
-
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
 	if (e.altKey) {
