@@ -45,31 +45,40 @@
         </div>
 
         <div class="main-ui">
-            <div id="notifications-container">
-                <div id="notification">
-                    Important notifications
-                </div>
-                <div id="login" class="hidden">Login</div>
-            </div>
-            
-            <div id="chat-history">
-                <!-- Proper chat message format
-                <div class="chat-message">
-                    <div class="message-meta">
-                        <div class="message-user">Username</div>
-                        <div class="message-time">DateTime</div>
+            <div class="main-wrap toggle">
+                <div id="notifications-container">
+                    <div id="notification">
+                        Important notifications
                     </div>
-                    <p class="message-body">
-                        Spicy jalapeno bacon ipsum dolor amet hamburger biltong ham shoulder, rump pork chop corned beef jowl. Ground round shank kevin, biltong drumstick doner t-bone spare ribs pork belly frankfurter strip steak meatloaf porchetta. Kielbasa strip steak alcatra, cow meatball landjaeger hamburger corned beef. Porchetta drumstick turkey tri-tip.
-                    </p>
+                    <div id="login" class="hidden">Login</div>
                 </div>
-                -->
-            </div>
+                
+                <div id="chat-history">
+                    <!-- Proper chat message format
+                    <div class="chat-message">
+                        <div class="message-meta">
+                            <div class="message-user">Username</div>
+                            <div class="message-time">DateTime</div>
+                        </div>
+                        <p class="message-body">
+                            Spicy jalapeno bacon ipsum dolor amet hamburger biltong ham shoulder, rump pork chop corned beef jowl. Ground round shank kevin, biltong drumstick doner t-bone spare ribs pork belly frankfurter strip steak meatloaf porchetta. Kielbasa strip steak alcatra, cow meatball landjaeger hamburger corned beef. Porchetta drumstick turkey tri-tip.
+                        </p>
+                    </div>
+                    -->
+                </div>
 
-            <form action="javascript:sendMessage()" class="chat-input">
-                <input id="message-box" type="text" autocomplete="off">
-                <button id="message-submit">Send</button>
-            </form>
+                <form action="javascript:sendMessage()" class="chat-input">
+                    <input id="message-box" type="text" autocomplete="off">
+                    <button id="message-submit">Send</button>
+                </form>
+            </div>
+        </div>
+        <div class="main-ui">
+            <div class="toggle">
+                <div id="chat-toggle">
+                    <p id="toggle-direction">▶</p>
+                </div>
+            </div>
         </div>
         
         <canvas id="paint" width="512" height="512">
