@@ -61,24 +61,12 @@
                     </p>
                 </div>
                 -->
-
-                <div class="chat-message">
-                    <div class="message-meta">
-                        <div class="message-user">Username</div>
-                        <div class="message-time">DateTime</div>
-                    </div>
-                    <p class="message-body">
-                        Spicy jalapeno bacon ipsum dolor amet hamburger biltong ham shoulder, rump pork chop corned beef jowl. Ground round shank kevin, biltong drumstick doner t-bone spare ribs pork belly frankfurter strip steak meatloaf porchetta. Kielbasa strip steak alcatra, cow meatball landjaeger hamburger corned beef. Porchetta drumstick turkey tri-tip.
-                    </p>
-                </div>
             </div>
 
-            <div class="chat-input">
-                <div>
-                    <input id="message-box" type="text">
-                    <button id="message-submit">Send</button>
-                </div>
-            </div>
+            <form action="javascript:sendMessage()" class="chat-input">
+                <input id="message-box" type="text" autocomplete="off">
+                <button id="message-submit">Send</button>
+            </form>
         </div>
 
         <div id="login" class="hidden">Login</div>
@@ -93,5 +81,6 @@
 	</body>
 
     <script src="chunk.js"></script>
+    <script src="chat.js"></script>
     <script src="canvas.js"></script>
 </html>

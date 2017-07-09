@@ -144,6 +144,7 @@ body {
 .message-time {
     color: darkgrey;
     font-size: 12px;
+    margin-left: 1em;
 }
 
 .message-body {

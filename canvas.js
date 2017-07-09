@@ -63,9 +63,10 @@ var img = new Image();
 
 // IO Server
 var socket = io(server);
+initChat(socket);
 socket.on('connect', ()=>{
 	console.log("Connected to server successfully");
-
+	getChatHistory();
 	socket.emit('get_canvas', (data)=>{
 
 		if (!data) { error("Failed to retreive canvas data."); return; }
