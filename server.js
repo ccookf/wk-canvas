@@ -1,14 +1,20 @@
 var fs = require('fs');
 var PNG = require('node-png').PNG;
 var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var https = require('https');
+var options = {
+	key: fs.readFileSync('ccookf_com.key'),
+	cert: fs.readFileSync('ccookf_com.crt'),
+	ca: fs.readFileSync('ccookf_com.ca-bundle')
+}
+var httpServer = https.Server(options, app);
+var io = require('socket.io')(httpServer);
 
 var port = 4242;
 
 var version = "0.2.0";
 
-var https = require('https');
+
 var verified = [];
 var sockets = [];
 var users = 0;
@@ -250,6 +256,6 @@ setInterval(()=>{
     io.emit('user-count', users);
 }, 2500);
 
-http.listen(port, ()=>{
+httpServer.listen(port, ()=>{
     console.log('IO listening on port ' + port);
 });
