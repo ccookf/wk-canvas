@@ -12,7 +12,7 @@ var io = require('socket.io')(httpServer);
 
 var port = 4242;
 
-var version = "0.2.0";
+var version = "0.2.1";
 
 
 var verified = [];
