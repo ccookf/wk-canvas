@@ -1,0 +1,13 @@
+Version 0.2.2
+-----------------------------------------------------------
+
+Client:
+* Changed guide mode from [Spacebar] -> [g]
+* Changed drag mode to [Spacebar] from [MouseDrag]
+* Can paint a continuous stroke with [MouseDown] 
+* Can only paint on loaded chunks now
+
+Server:
+* Increased the backup threshold for paint operations
+* Does an automatic hourly backup
+* User count tracking should be more accurate

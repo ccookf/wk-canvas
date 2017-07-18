@@ -8,7 +8,7 @@ else error("jQuery has not loaded");
 
 var server = "https://ccookf.com:4242";
 //var server = "https://localhost:4242";
-var version = "0.2.0";
+var version = "0.2.2";
 var isValidUser = false; 
 
 var debug_mode = false;
@@ -17,12 +17,12 @@ var scale = [1, 2, 4, 8, 16, 32, 64];
 var offset = { x: 0, y: 0 };
 var scale_level = 4;
 
-var pos = { x: 0, y: 0 };
+var pos = { x: null, y: null }; //Mouse position in image space as stroke coord
 var isMouseDown = false;
 var isDragMode = false;
 var isGuideMode = false;
 var isAltHeld = false;
-var dragThreshold = 25; //Number of pixels before mousedown is treated as a drag
+var isSpaceHeld = false;
 var downCoords = { x: 0, y: 0 }; //Coordinates of mousedown event
 var mouseOverPixel = { x: 0, y: 0 }; //Current "pixel" under the mouse
 
@@ -176,14 +176,12 @@ $("#color-picker").click(()=>{
 	paintColor.r = parseInt(hex.slice(1, 3), 16);
 	paintColor.g = parseInt(hex.slice(3, 5), 16);
 	paintColor.b = parseInt(hex.slice(5, 7), 16);
-	console.log(paintColor);
 });
 $("#color-picker").change(()=>{
 	var hex = $("#color-picker").val();
 	paintColor.r = parseInt(hex.slice(1, 3), 16);
 	paintColor.g = parseInt(hex.slice(3, 5), 16);
 	paintColor.b = parseInt(hex.slice(5, 7), 16);
-	console.log(paintColor);
 });
 
 //Default colors
@@ -213,6 +211,7 @@ $("#toggle-chat").click(()=>{
 
 // Mouse state
 canvas.addEventListener("mousedown", (e)=>{
+	pos = canvasToImageCoordinate(e.layerX, e.layerY) //update current mouse pos
 	if (e.altKey) {
 		try {
 			var pick = (ctx.getImageData(e.layerX, e.layerY, 1, 1)).data;
@@ -223,20 +222,20 @@ canvas.addEventListener("mousedown", (e)=>{
 		} catch (e) { error("Failed to pick color: " + e.message); }
 	} else {
 		isMouseDown = true;
-		isDragMode = false;
 		downCoords.x = e.layerX;
 		downCoords.y = e.layerY;
 	}
 });
 canvas.addEventListener("mouseleave", ()=>{
 	isMouseDown = false;
+	isDragMode = false;
 	updateCanvas(); //Remove the pixel preview, even across windows
 });
-canvas.addEventListener("mouseup", ()=>{
-	if (!isDragMode && !isAltHeld) paint();
 
+canvas.addEventListener("mouseup", ()=>{
 	isMouseDown = false;
 });
+
 canvas.addEventListener("mousemove", mouseMove);
 
 // Keyboard events
@@ -251,10 +250,13 @@ window.addEventListener("keyup", (e)=>{
 		case "0":
 			resetView();
 			break;
-		case " ":
+		case "g":
 			isGuideMode = !isGuideMode;
 			console.log("Guide Mode: " + isGuideMode);
 			updateCanvas();
+			break;
+		case " ":
+			isDragMode = false;
 			break;
 		default:
 			if (debug_mode) console.log("Unexpected keyboard event: " + e.key);
@@ -263,6 +265,9 @@ window.addEventListener("keyup", (e)=>{
 });
 window.addEventListener("keydown", (e)=>{
 	switch (e.key) {
+		case " ":
+			isDragMode = true;
+			break;
 		case "Alt":
 			updateCanvas(); //clears out temp drawings for pick mode
 			isAltHeld = true;
@@ -389,23 +394,35 @@ function imageToCanvasCoordinate(x, y) {
 	return canvasCoord;
 }
 
-function paint() {
+function paint(x, y, callback) {
 	if (isValidUser == false) return;
-	if (debug_mode) console.log('Paint applied to coordinate: ('+ downCoords.x + ', ' + downCoords.y + ')');
-	//Convert canvas point to image space
-	localCoord = canvasToImageCoordinate(downCoords.x, downCoords.y);
-
-	if (debug_mode) console.log('Image coordinate: ('+ localCoord.x + ', ' + localCoord.y + ')');
 	var color = new Uint8Array([paintColor.r, paintColor.g, paintColor.b]);
-	var out = { color: color, pos: { x: localCoord.x, y: localCoord.y }};
-	
-	//Don't paint the pixel until the server verifies its fine and announces it
-	socket.emit('paint', out);
+
+	var start = { x: pos.x, y: pos.y };
+
+	//Get the difference from the current coordinate and last paint coordinate
+	var diff = { x: x - start.x, y: y - start.y };
+
+	//Use the distance as the number of steps when interpolating a stroke
+	var steps = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+	steps = steps < 1 ? 1 : steps; //min 1
+
+	for (var i = 0; i < steps; i++) {
+		var delta = i / steps;
+		var stepx = Math.floor(start.x + diff.x * delta);
+		var stepy = Math.floor(start.y + diff.y * delta);
+
+		var out = { color: color, pos: { x: stepx, y: stepy }};
+		
+		//Don't paint the pixel until the server verifies its fine and announces it
+		socket.emit('paint', out);
+	}
+	callback();
 }
 
 //Server announcing the paint from above function
 socket.on('paint', (data)=>{
-	console.log(data);
+	//console.log(data);
 	ictx.fillStyle = 'rgb(' + data.color[0] + ',' + data.color[1] + ',' + data.color[2] + ')';
 	ictx.fillRect(data.pos.x, data.pos.y, 1, 1);
 	updateCanvas();
@@ -432,23 +449,29 @@ function mouseMove(e) {
 	centeredCoord = { x: localCoord.x - image.width / 2, y: -1 * (localCoord.y - image.height / 2) };
 	$("#coordinates").html("( " + centeredCoord.x + ", " + centeredCoord.y + ")");
 	
-	if (isMouseDown) {
-		//Check to see if it's in drag mode
-		if (isDragMode == false) {
-			//Enable drag mode if distance dragged is greater than the drag threshold
-			//This allows a slight mouse twitch while painting, but a low enough threshold feels responsive on drag
-			if (Math.abs(x - downCoords.x) > dragThreshold || Math.abs(y - downCoords.y) >= dragThreshold) {
-				isDragMode = true;
-			}
-		} else {
-			offset.x += x - downCoords.x;
-			offset.y += y - downCoords.y;
+	if (isMouseDown && isDragMode) {
+		offset.x += x - downCoords.x;
+		offset.y += y - downCoords.y;
 
-			downCoords.y = y;
-			downCoords.x = x;
+		downCoords.y = y;
+		downCoords.x = x;
 
-			updateCanvas();
-			checkUnloadedChunks();
+		updateCanvas();
+		checkUnloadedChunks();
+	}
+
+	//Paint with strokes
+	if (isMouseDown && !isDragMode && !isAltHeld) {
+		if (localCoord.x != pos.x || localCoord.y != pos.y) {
+			
+			//Boundary checking
+			if (localCoord.x < 0 || localCoord.y < 0) return;
+			if (localCoord.x > image.width || Math.abs(localCoord.y) > image.height) return;
+			if (isChunkLoaded(localCoord.x, localCoord.y) == false) return;
+
+			paint(localCoord.x, localCoord.y, ()=>{
+				pos = localCoord; //update the last stroke coordinate
+			});
 		}
 	}
 }

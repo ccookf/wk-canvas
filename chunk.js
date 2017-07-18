@@ -41,6 +41,9 @@ function initChunks(height, width, size) {
  */
 function findUnloadedChunks(x, y, a, b, display = false) {
 
+    //I am 90% certain I forgot to account for the negative y space
+    //but it somehow worked out. @todo verify this
+
     //Convert image space coordinates to the chunk space
     var left = Math.floor(x / CHUNK_SIZE);
     var top = Math.floor(y / CHUNK_SIZE);
@@ -66,6 +69,24 @@ function findUnloadedChunks(x, y, a, b, display = false) {
     }
     if (display) console.log("Found " + out.length + " unloaded chunks.");
     return out;
+}
+
+/**
+ * @description Determines if the chunk is loaded at the given image space coords
+ * @param {number} hor 
+ * @param {number} ver 
+ */
+function isChunkLoaded(hor, ver) {
+    var x = Math.floor(hor / CHUNK_SIZE);
+    var y = Math.floor(ver / CHUNK_SIZE);
+
+    try {
+        if ((chunks[y][x]).isLoaded == false) return false;
+        else return true;
+    } catch (e) {
+        console.log("isChunkLoaded failure:");
+        console.log(e);
+    }
 }
 
 /**

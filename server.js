@@ -12,12 +12,11 @@ var io = require('socket.io')(httpServer);
 
 var port = 4242;
 
-var version = "0.2.1";
+var version = "0.2.2";
 
 
 var verified = [];
 var sockets = [];
-var users = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Canvas management ///////////////////////////////////////////////////////////////////////////
@@ -27,7 +26,7 @@ var CANVAS_WIDTH = 128;
 var CANVAS_HEIGHT = 128;
 var CHUNK_SIZE = 128;
 var canvas = [];
-var filename = 'test.png';
+var filename = 'canvas.png';
 
 fs.createReadStream(filename).pipe(new PNG({}))
     .on('error', function(err) {
@@ -55,7 +54,7 @@ fs.createReadStream(filename).pipe(new PNG({}))
         }
     });
 
-const BACKUP_THRESHOLD = 25;
+const BACKUP_THRESHOLD = 250;
 var changes = 0;
 
 //Update the canvas and run a backup after BACKUP_THRESHOLD changes occur
@@ -70,12 +69,12 @@ function pushPaint(data) {
     changes++;
     canvas[data.pos.y][data.pos.x] = data.color;
 
-    console.log(data);
+    //console.log(data);
 
     if (changes >= BACKUP_THRESHOLD) {
         //At some point I may want to lock data. Need to look into 
         //possible concurrency issues later
-        saveBackup((res)=>{
+        saveBackup(filename, (res)=>{
             if (true) return;
         });
         changes = 0;
@@ -84,7 +83,7 @@ function pushPaint(data) {
 
 //This just saves to a file, but at some point I should shove it out to S3
 //And setup numbered output so we can get server history and time lapse
-function saveBackup(callback) {
+function saveBackup(name, callback) {
     var out = new PNG({width: CANVAS_WIDTH, height: CANVAS_HEIGHT});
     for (var y = 0; y < out.height; y++) {
         for (var x = 0; x < out.width; x++) {
@@ -95,9 +94,17 @@ function saveBackup(callback) {
             out.data[idx+3] = 255;
         }
     }
-    out.pack().pipe(fs.createWriteStream(filename));
+    out.pack().pipe(fs.createWriteStream(name));
     callback(true);
 }
+
+//Set an hourly time based auto backup.
+setInterval(() => {
+    saveBackup(filename, (res)=>{
+        if (true) console.log("Hourly backup complete. " + Date.now().toString());
+        else console.log("Hourly backup failed. " + Date.now().toString());
+    })
+}, (1000 * 60 * 60));
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///// Chat ////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +188,6 @@ io.on('connection', (socket)=>{
         if (verified[apiKey] && verified[apiKey].level > 3) {
             console.log('Returning user verified');
             sockets[socket.id] = apiKey;
-            users++;
             callback(true, "You should never see this.");
             return;
         } else {
@@ -206,7 +212,6 @@ io.on('connection', (socket)=>{
                             console.log('User is valid.');
                             callback(true, "You should never see this.");
                             sockets[socket.id] = apiKey;
-                            users++;
                             return;
                         } else if (user.level < 4) {
                             console.log('User is low level.');
@@ -238,13 +243,11 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('disconnect', ()=>{
-        if (sockets[socket.id]) users--;
         console.log(sockets[socket.id] + " disconnected.");
         delete sockets[socket.id];
     });
 
     socket.on('logout', (callback)=>{
-        if (sockets[socket.id]) users--;
         console.log(sockets[socket.id] + " disconnected.");
         delete sockets[socket.id];
         callback(true);
@@ -253,8 +256,8 @@ io.on('connection', (socket)=>{
 
 //Broadcast the number of logged in users periodically
 setInterval(()=>{
-    io.emit('user-count', users);
-}, 2500);
+    io.emit('user-count', Object.keys(sockets).length);
+}, 5000);
 
 httpServer.listen(port, ()=>{
     console.log('IO listening on port ' + port);
