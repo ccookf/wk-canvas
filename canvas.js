@@ -224,6 +224,17 @@ canvas.addEventListener("mousedown", (e)=>{
 		isMouseDown = true;
 		downCoords.x = e.layerX;
 		downCoords.y = e.layerY;
+
+		if (!isDragMode && !isAltHeld) {
+			var localCoord = pos;
+			//Boundary checking before attempting paint
+			if (localCoord.x < 0 || localCoord.y < 0) return;
+			if (localCoord.x > image.width || Math.abs(localCoord.y) > image.height) return;
+			if (isChunkLoaded(localCoord.x, localCoord.y) == false) return;
+			paint(localCoord.x, localCoord.y, ()=>{
+				//Do nothing
+			});
+		}
 	}
 });
 canvas.addEventListener("mouseleave", ()=>{
